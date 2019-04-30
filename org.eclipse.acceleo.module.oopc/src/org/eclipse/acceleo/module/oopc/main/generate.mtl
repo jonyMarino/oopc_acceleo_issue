@@ -1,0 +1,33 @@
+[comment encoding = UTF-8 /]
+[module generate('http://www.eclipse.org/uml2/5.0.0/UML')]
+
+
+[query public superPaths(aClass: Class) : Sequence(Sequence(Class))=
+	if (aClass.superClass->isEmpty()) then
+		Sequence(Sequence(Class)){Sequence(Class){aClass}}
+	else
+		aClass.superClass->collectNested(superClass1 | superPaths(superClass1).prepend(aClass) )->asSequence()
+	endif
+/]
+
+
+[template public main(aNamedElement : uml::NamedElement)]
+[comment @main /]
+
+[if (aNamedElement.oclIsTypeOf(uml::Class)) ]
+[file (aNamedElement.oclAsType(uml::Class).name + '.c', false, 'UTF-8')]
+[genClass(aNamedElement.oclAsType(uml::Class))/]
+[/file]
+[/if]
+	
+[/template]
+
+
+
+[template public genClass (aClass : uml::Class) ]
+[for (classes:Sequence(Class) | superPaths())]
+	Route [i/]:
+	[for (class: uml::Class | classes)separator(',')][class.name/][/for]
+[/for]
+
+[/template]
